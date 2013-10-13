@@ -34,7 +34,7 @@ $ curl -sS https://getcomposer.org/installer | php
 $ php composer.phar install
 ```
 
-Next, create your `service.yml` in `%SF_ROOT%/config/services.yml` something like:
+Next, create your `services.yml` in `%SF_ROOT%/config/services.yml` something like:
 
 ```yaml
 parameters:
@@ -59,7 +59,7 @@ class ProjectConfiguration extends sfProjectConfiguration
     ...
 ```
 
-Everything is ready. Now, Your `sfContext` has been installed Symfony's ServicecContainer, it is called and used as following in your code:
+Everything is ready. Now, Your `sfContext` has installed Symfony's ServicecContainer, it is called and used as following in your code:
 
 ```php
 $container = sfContext::getInstance();
