@@ -65,5 +65,5 @@ Everything is ready. Now, Your `sfContext` has installed Symfony's ServicecConta
 $container = sfContext::getInstance()->getContainer();
 
 // Retrieve the Issei\Tester class which is stored your name "Issei Murasawa"
-$tester = $container->get('issei_tester);
+$tester = $container->get('issei_tester');
 ```
