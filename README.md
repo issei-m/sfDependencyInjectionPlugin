@@ -62,5 +62,8 @@ class ProjectConfiguration extends sfProjectConfiguration
 Everything is ready. Now, Your `sfContext` has installed Symfony's ServicecContainer, it is called and used as following in your code:
 
 ```php
-$container = sfContext::getInstance();
+$container = sfContext::getInstance()->getContainer();
+
+// Retrieve the Issei\Tester class which is stored your name "Issei Murasawa"
+$tester = $container->get('issei_tester);
 ```
