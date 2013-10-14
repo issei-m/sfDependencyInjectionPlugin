@@ -21,7 +21,7 @@ use Symfony\Component\Config\ConfigCache;
  *
  * Integration with Symfony's DependencyInjection component like the HttpKernel component.
  *
- * @package    sfPsrSupportPlugin
+ * @package    sfDependencyInjectionPlugin
  * @subpackage config
  * @author     Issei Murasawa <issei.m7@gmail.com>
  * @link       https://github.com/symfony/DependencyInjection
