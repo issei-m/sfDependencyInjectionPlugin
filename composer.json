@@ -15,5 +15,10 @@
         "symfony/yaml": "2.3.*",
         "symfony/config": "2.3.*",
         "composer/installers": "~1.0.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.1-dev"
+        }
     }
 }

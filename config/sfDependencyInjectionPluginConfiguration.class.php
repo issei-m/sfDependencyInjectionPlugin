@@ -8,8 +8,6 @@
  * file that was distributed with this source code.
  */
 
-require_once sfConfig::get('sf_root_dir') . '/psr/vendor/autoload.php';
-
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
