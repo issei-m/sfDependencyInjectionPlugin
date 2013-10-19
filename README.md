@@ -10,21 +10,13 @@ Create the following `composer.json` in your symfony 1.4 project's root.
 
 ```json
 {
-    "config": {
-        "vendor-dir": "psr/vendor"
-    },
-    "autoload": {
-        "psr-0": { "": "psr/lib" }
-    },
     "require": {
-        "symfony/config": "2.3.*",
-        "symfony/yaml": "2.3.*",
-        "symfony/dependency-injection": "2.3.*"
+        "issei-m/sf-dependency-injection-plugin": "1.*"
     }
 }
 ```
 
-Here, Composer would install some vendors into `%SF_ROOT%/psr/vendor`.
+Here, Composer would install the plugin in your `plugins` directory and some Symfony2 components into `vendor/symfony/`.
 Also, You can locate your PSR supported libraries to be auto-loaded in `%SF_ROOT%/psr/lib`.
 
 Install the Composer and install some libraries.
@@ -34,9 +26,29 @@ $ curl -sS https://getcomposer.org/installer | php
 $ php composer.phar install
 ```
 
+To register the autoloader for libraries installed with composer, you must add this at the top of your ProjectConfiguration class:
+
+``` php
+# config/ProjectConfiguration.class.php
+
+// Composer autoload
+require_once dirname(__DIR__).'/vendor/autoload.php';
+
+// symfony1 autoload
+require_once dirname(__DIR__).'/lib/vendor/symfony/lib/autoload/sfCoreAutoload.class.php';
+sfCoreAutoload::register();
+
+class ProjectConfiguration extends sfProjectConfiguration
+{
+    // ...
+}
+```
+
 Next, create your `services.yml` in `%SF_ROOT%/config/services.yml` something like:
 
 ```yaml
+# config/services.yml
+
 parameters:
     your_name: 'Issei Murasawa'
 
@@ -59,7 +71,7 @@ class ProjectConfiguration extends sfProjectConfiguration
     ...
 ```
 
-Everything is ready. Now, Your `sfContext` has installed Symfony's ServicecContainer, it is called and used as following in your code:
+Everything is ready. Now, Your `sfContext` has installed Symfony's ServiceContainer, it is called and used as following in your code:
 
 ```php
 $container = sfContext::getInstance()->getContainer();

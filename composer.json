@@ -1,0 +1,24 @@
+{
+    "name": "issei-m/sf-dependency-injection-plugin",
+    "description": "Supporing Symfony's DependencyInjection component for your symfony1 project",
+    "keywords": ["symfony1", "plugin", "dependency-injection", "service"],
+    "license": "MIT",
+    "type": "symfony1-plugin",
+    "authors": [
+        {
+            "name": "Issei Murasawa",
+            "email": "issei.m7@gmail.com"
+        }
+    ],
+    "require": {
+        "symfony/dependency-injection": "2.3.*",
+        "symfony/yaml": "2.3.*",
+        "symfony/config": "2.3.*",
+        "composer/installers": "~1.0.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.1-dev"
+        }
+    }
+}
