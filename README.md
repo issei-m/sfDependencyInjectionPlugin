@@ -11,7 +11,7 @@ Create the following `composer.json` in your symfony 1.4 project's root.
 ```json
 {
     "config": {
-        "vendor-dir": "plugins"
+        "vendor-dir": "lib/vendor"
     },
     "autoload": {
         "psr-0": { "": "psr" }
@@ -23,7 +23,7 @@ Create the following `composer.json` in your symfony 1.4 project's root.
 ```
 
 Here, Composer would install the plugin in your `plugins` directory and some Symfony2 components into `vendor/symfony/`.
-Also, You can locate your PSR supported libraries to be auto-loaded in `%SF_ROOT%/psr`.
+Also, You can locate your PSR supported libraries to be auto-loaded in `%SF_ROOT%/psr` (optional).
 
 Install the Composer and install some libraries.
 
@@ -38,7 +38,7 @@ To register the autoloader for libraries installed with composer, you must add t
 # config/ProjectConfiguration.class.php
 
 // Composer autoload
-require_once dirname(__DIR__).'/plugins/autoload.php';
+require_once dirname(__DIR__).'/lib/vendor/autoload.php';
 
 // symfony1 autoload
 require_once dirname(__DIR__).'/lib/vendor/symfony/lib/autoload/sfCoreAutoload.class.php';
