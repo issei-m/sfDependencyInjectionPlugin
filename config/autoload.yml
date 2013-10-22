@@ -1,0 +1,5 @@
+autoload:
+  sfDependencyInjectionPlugin_lib:
+    name:       sfDependencyInjectionPlugin lib
+    path:       %SF_PLUGINS_DIR%/sfDependencyInjectionPlugin/lib
+    recursive:  false

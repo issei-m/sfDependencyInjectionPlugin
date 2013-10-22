@@ -3,8 +3,8 @@ sfDependencyInjectionPlugin
 
 It provides supporting the Symfony's DependencyInjection component in your older symfony (1.4) project with Composer.
 
-How to use
-----------
+Installation
+------------
 
 Create the following `composer.json` in your symfony 1.4 project's root.
 
@@ -12,13 +12,13 @@ Create the following `composer.json` in your symfony 1.4 project's root.
 {
     "config": {
         "vendor-dir": "lib/vendor"
+    }
+    "require": {
+        "issei-m/sf-dependency-injection-plugin": "1.*"
     },
     "autoload": {
         "psr-0": { "": "psr" }
     },
-    "require": {
-        "issei-m/sf-dependency-injection-plugin": "1.*"
-    }
 }
 ```
 
@@ -50,23 +50,39 @@ class ProjectConfiguration extends sfProjectConfiguration
 }
 ```
 
-Next, create your `services.yml` in `%SF_ROOT%/config/services.yml` something like:
+Usage
+-----
+
+First, create your `services.yml` in `%SF_ROOT%/config/services.yml`. It can be defined your parameters/services to each different environments.
+
+Something like:
 
 ```yaml
 # config/services.yml
 
-parameters:
-    your_name: 'Issei Murasawa'
+dev:
+  parameters:
+    mailer.transport: gmail
 
-services:
-    issei_tester:
-        class: Issei\Tester
-        calls:
-            - [setName, ["%your_name%"]]
+all:
+  parameters:
+    # ...
+    mailer.transport: sendmail
 
+  services:
+    mailer:
+      class:     Mailer
+      arguments: ["%mailer.transport%"]
+    newsletter_manager:
+      class:     NewsletterManager
+      calls:
+        - [setMailer, ["@mailer"]]
 ```
 
-Edit `ProjectConfiguration` to be enabled this plugins.
+The `services.yml` is supporting the configuratoin cascade like the `settings.yml`, and it can be located in several different `config` dir. (e.g.`%SF_APP_CONFIG_DIR`)
+When the ServiceContainer is compiled, the values from these are merged.
+
+Next, enable this plugin at your `ProjectConfiguration`:
 
 ```php
 class ProjectConfiguration extends sfProjectConfiguration
@@ -77,11 +93,12 @@ class ProjectConfiguration extends sfProjectConfiguration
     ...
 ```
 
-Everything is ready. Now, Your `sfContext` has installed Symfony's ServiceContainer, it is called and used as following in your code:
+Now, your `sfContext` has installed Symfony's ServiceContainer, it is used as following in your code:
 
 ```php
+// Get the ServiceContainer.
 $container = sfContext::getInstance()->getContainer();
 
-// Retrieve the Issei\Tester class which is stored your name "Issei Murasawa"
-$tester = $container->get('issei_tester');
+// Retrieve the NewsletterManager class which was initialized with the Mailer.
+$tester = $container->get('newsletter_manager');
 ```

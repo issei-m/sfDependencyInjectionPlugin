@@ -8,10 +8,8 @@
  * file that was distributed with this source code.
  */
 
-use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Config\ConfigCache;
 
 /**
@@ -23,7 +21,6 @@ use Symfony\Component\Config\ConfigCache;
  * @subpackage config
  * @author     Issei Murasawa <issei.m7@gmail.com>
  * @link       https://github.com/symfony/DependencyInjection
- * @link       https://github.com/symfony/HttpKernel
  */
 class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
 {
@@ -34,7 +31,7 @@ class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
     {
         $this->dispatcher->connect('context.load_factories', function(sfEvent $event) {
             if (sfConfig::get('sf_debug') && sfConfig::get('sf_logging_enabled')) {
-                $timer = sfTimerManager::getTimer('Initialize ServiceContainer');
+                $timer = sfTimerManager::getTimer('Initialize the ServiceContainer');
             }
 
             $context = $event->getSubject();
@@ -66,6 +63,8 @@ class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
             $this->dumpContainer($cache, $container, $class, $this->getContainerBaseClass());
 
             sfContext::getInstance()->getLogger()->info('Initialized the ServiceContainer');
+        } else {
+            sfContext::getInstance()->getLogger()->info('Loaded the ServiceContainer from cache');
         }
 
         require_once $cache;
@@ -105,12 +104,11 @@ class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
      */
     protected function buildContainer()
     {
-        $container = new ContainerBuilder();
+        $builder = new sfContainerBuilder();
 
-        $loader = new YamlFileLoader($container, new FileLocator(sfConfig::get('sf_config_dir')));
-        $loader->load('services.yml');
+        $configPaths = $this->configuration->getConfigPaths('config/services.yml');
 
-        return $container;
+        return $builder->build($configPaths);
     }
 
     /**
@@ -143,6 +141,8 @@ class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
      * @param string $source A PHP string
      *
      * @return string The PHP string with the comments removed
+     *
+     * @link https://github.com/symfony/HttpKernel/blob/v2.3.6/Kernel.php#L752
      */
     public static function stripComments($source)
     {
