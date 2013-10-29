@@ -12,7 +12,7 @@ Create the following `composer.json` in your symfony 1.4 project's root.
 {
     "config": {
         "vendor-dir": "lib/vendor"
-    }
+    },
     "require": {
         "issei-m/sf-dependency-injection-plugin": "1.*"
     },
