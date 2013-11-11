@@ -79,7 +79,7 @@ all:
         - [setMailer, ["@mailer"]]
 ```
 
-The `services.yml` is supporting the configuratoin cascade like the `settings.yml`, and it can be located in several different `config` dir. (e.g.`%SF_APP_CONFIG_DIR`)
+The `services.yml` is supporting the configuratoin cascade like the `settings.yml`, and it can be located in several different `config` dir. (e.g.`%SF_APP_CONFIG_DIR%`)
 When the ServiceContainer is compiled, the values from these are merged.
 
 Next, enable this plugin at your `ProjectConfiguration`:
@@ -100,5 +100,5 @@ Now, your `sfContext` has installed Symfony's ServiceContainer, it is used as fo
 $container = sfContext::getInstance()->getContainer();
 
 // Retrieve the NewsletterManager class which was initialized with the Mailer.
-$tester = $container->get('newsletter_manager');
+$newsletterManager = $container->get('newsletter_manager');
 ```
