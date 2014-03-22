@@ -29,18 +29,26 @@ class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
      */
     public function initialize()
     {
-        $this->dispatcher->connect('context.load_factories', function(sfEvent $event) {
-            if (sfConfig::get('sf_debug') && sfConfig::get('sf_logging_enabled')) {
-                $timer = sfTimerManager::getTimer('Initialize the ServiceContainer');
-            }
+        $this->dispatcher->connect('context.load_factories', array($this, 'setContextContainer'));
+    }
 
-            $context = $event->getSubject();
-            $context->set('container', $this->initializeContainer());
-
-            if (sfConfig::get('sf_debug') && sfConfig::get('sf_logging_enabled')) {
-                $timer->addTime();
-            }
-        });
+    /**
+     * Sets the service container in context.
+     *
+     * @param sfEvent $event
+     */
+    public function setContextContainer(sfEvent $event)
+    {
+        if (sfConfig::get('sf_debug') && sfConfig::get('sf_logging_enabled')) {
+            $timer = sfTimerManager::getTimer('Initialize the ServiceContainer');
+        }
+  
+        $context = $event->getSubject();
+        $context->set('container', $this->initializeContainer());
+  
+        if (sfConfig::get('sf_debug') && sfConfig::get('sf_logging_enabled')) {
+            $timer->addTime();
+        }
     }
 
     /**
