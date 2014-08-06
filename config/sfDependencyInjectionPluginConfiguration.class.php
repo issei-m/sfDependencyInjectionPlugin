@@ -89,7 +89,7 @@ class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
      */
     protected function getContainerClass()
     {
-        return (sfConfig::get('sf_debug') ? 'Debug' : '') . 'ProjectContainer';
+        return sfConfig::get('sf_app') . (sfConfig::get('sf_debug') ? 'Debug' : '') . 'Container';
     }
 
     /**
