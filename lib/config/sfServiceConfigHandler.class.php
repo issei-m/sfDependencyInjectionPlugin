@@ -56,8 +56,9 @@ class sfServiceConfigHandler extends sfYamlConfigHandler
     private function buildContainer($configFiles, $isSymfonyNewerThan150)
     {
         $container = new ContainerBuilder();
-        $loader = new sfContainerArrayLoader($container);
+        $container->setResourceTracking(false);
 
+        $loader = new sfContainerArrayLoader($container);
         $loader->load(sfDefineEnvironmentConfigHandler::getConfiguration($configFiles));
 
         if ($isSymfonyNewerThan150) {
