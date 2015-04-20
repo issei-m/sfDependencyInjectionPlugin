@@ -8,67 +8,51 @@
  * file that was distributed with this source code.
  */
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\Config\Resource\FileResource;
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Alias;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * The container lib.
+ * @author Issei Murasawa <issei.m7@gmail.com>
  *
- * It is configured by loading the YAML configuration which defined parameters/services each every environment.
- *
- * @author  Issei Murasawa <issei.m7@gmail.com>
- * @package sfDependencyInjectionPlugin
+ * @link https://github.com/symfony/DependencyInjection/blob/v2.3.27/Loader/YamlFileLoader.php
  */
-class sfContainerBuilder
+class sfContainerArrayLoader
 {
     /**
-     * @var ContainerInterface
+     * @var ContainerBuilder
      */
     private $container;
 
-    /**
-     * Constructor.
-     *
-     * @param ContainerInterface $container The base container.
-     */
-    public function __construct(ContainerInterface $container = null)
+    public function __construct(ContainerBuilder $container)
     {
-        $this->container = $container ?: new ContainerBuilder();
+        $this->container = $container;
     }
 
-    /**
-     * Returns the container which has been built from YAML file resources.
-     *
-     * @param  array $configPaths
-     *
-     * @return ContainerBuilder
-     */
-    public function build(array $configPaths)
+    public function load(array $config)
     {
-        foreach ($configPaths as $configPath) {
-            $this->container->addResource(new FileResource($configPath));
-        }
+        if (isset($config['parameters'])) {
+            if (!is_array($config['parameters'])) {
+                throw new InvalidArgumentException(sprintf('The "parameters" key should contain an array. Check your YAML syntax.'));
+            }
 
-        $content = sfDefineEnvironmentConfigHandler::getConfiguration($configPaths);
-
-        if (isset($content['parameters'])) {
-            foreach ($content['parameters'] as $key => $value) {
+            foreach ($config['parameters'] as $key => $value) {
                 $this->container->setParameter($key, $this->resolveServices($value));
             }
         }
 
-        if (isset($content['services'])) {
-            foreach ($content['services'] as $id => $service) {
+        if (isset($config['services'])) {
+            if (!is_array($config['services'])) {
+                throw new InvalidArgumentException(sprintf('The "services" key should contain an array. Check your YAML syntax.'));
+            }
+
+            foreach ($config['services'] as $id => $service) {
                 $this->parseDefinition($id, $service);
             }
         }
-
-        return $this->container;
     }
 
     /**
@@ -79,7 +63,7 @@ class sfContainerBuilder
      *
      * @throws InvalidArgumentException When tags are invalid
      *
-     * @link https://github.com/symfony/DependencyInjection/blob/v2.3.6/Loader/YamlFileLoader.php#L127
+     * @link https://github.com/symfony/DependencyInjection/blob/v2.3.27/Loader/YamlFileLoader.php#L135
      */
     private function parseDefinition($id, $service)
     {
@@ -87,8 +71,14 @@ class sfContainerBuilder
             $this->container->setAlias($id, substr($service, 1));
 
             return;
-        } elseif (isset($service['alias'])) {
-            $public = !array_key_exists('public', $service) || (Boolean) $service['public'];
+        }
+
+        if (!is_array($service)) {
+            throw new InvalidArgumentException(sprintf('A service definition must be an array or a string starting with "@" but %s found for service "%s". Check your YAML syntax.', gettype($service), $id));
+        }
+
+        if (isset($service['alias'])) {
+            $public = !array_key_exists('public', $service) || (bool) $service['public'];
             $this->container->setAlias($id, new Alias($service['alias'], $public));
 
             return;
@@ -161,6 +151,10 @@ class sfContainerBuilder
         }
 
         if (isset($service['calls'])) {
+            if (!is_array($service['calls'])) {
+                throw new InvalidArgumentException(sprintf('Parameter "calls" must be an array for service "%s" in %s. Check your YAML syntax.', $id, $file));
+            }
+
             foreach ($service['calls'] as $call) {
                 $args = isset($call[1]) ? $this->resolveServices($call[1]) : array();
                 $definition->addMethodCall($call[0], $args);
@@ -169,20 +163,24 @@ class sfContainerBuilder
 
         if (isset($service['tags'])) {
             if (!is_array($service['tags'])) {
-                throw new InvalidArgumentException(sprintf('Parameter "tags" must be an array for service "%s".', $id));
+                throw new InvalidArgumentException(sprintf('Parameter "tags" must be an array for service "%s" in %s. Check your YAML syntax.', $id, $file));
             }
 
             foreach ($service['tags'] as $tag) {
+                if (!is_array($tag)) {
+                    throw new InvalidArgumentException(sprintf('A "tags" entry must be an array for service "%s" in %s. Check your YAML syntax.', $id, $file));
+                }
+
                 if (!isset($tag['name'])) {
-                    throw new InvalidArgumentException(sprintf('A "tags" entry is missing a "name" key for service "%s".', $id));
+                    throw new InvalidArgumentException(sprintf('A "tags" entry is missing a "name" key for service "%s" in %s.', $id, $file));
                 }
 
                 $name = $tag['name'];
                 unset($tag['name']);
 
-                foreach ($tag as $attribute => $value) {
+                foreach ($tag as $value) {
                     if (!is_scalar($value)) {
-                        throw new InvalidArgumentException(sprintf('A "tags" attribute must be of a scalar-type for service "%s", tag "%s".', $id, $name));
+                        throw new InvalidArgumentException(sprintf('A "tags" attribute must be of a scalar-type for service "%s", tag "%s" in %s. Check your YAML syntax.', $id, $name, $file));
                     }
                 }
 
@@ -196,11 +194,11 @@ class sfContainerBuilder
     /**
      * Resolves services.
      *
-     * @param string $value
+     * @param string|array $value
      *
-     * @return Reference
+     * @return array|string|Reference
      *
-     * @link https://github.com/symfony/DependencyInjection/blob/v2.3.6/Loader/YamlFileLoader.php#L310
+     * @link https://github.com/symfony/DependencyInjection/blob/v2.3.27/Loader/YamlFileLoader.php#L334
      */
     private function resolveServices($value)
     {

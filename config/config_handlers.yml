@@ -1,0 +1,3 @@
+config/services.yml:
+  file:  %SF_PLUGINS_DIR%/sfDependencyInjectionPlugin/lib/config/sfServiceConfigHandler.class.php
+  class: sfServiceConfigHandler
