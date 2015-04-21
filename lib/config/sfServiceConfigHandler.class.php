@@ -78,7 +78,6 @@ class sfServiceConfigHandler extends sfYamlConfigHandler
 
         if (!sfConfig::get('sf_debug')) {
             $content = self::stripComments($content);
-            return $content;
         }
 
         return $content;
