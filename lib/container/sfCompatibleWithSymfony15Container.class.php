@@ -8,12 +8,10 @@
  * file that was distributed with this source code.
  */
 
-use Symfony\Component\DependencyInjection\Container;
-
 /**
  * @author Issei Murasawa <issei.m7@gmail.com>
  */
-class sfContainer extends Container implements sfServiceContainerInterface
+class sfCompatibleWithSymfony15Container extends sfContainer implements sfServiceContainerInterface
 {
     /**
      * {@inheritdoc}

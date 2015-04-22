@@ -8,14 +8,12 @@
  * file that was distributed with this source code.
  */
 
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+
 /**
  * The configuration of sfDependencyInjectionPlugin.
  *
- * Integration with Symfony's DependencyInjection component like the HttpKernel component.
- *
  * @author Issei Murasawa <issei.m7@gmail.com>
- *
- * @link https://github.com/symfony/DependencyInjection
  */
 class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
 {
@@ -25,26 +23,36 @@ class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
     public function initialize()
     {
         sfConfig::set('sf_container_class', sfConfig::get('sf_app') . (sfConfig::get('sf_debug') ? 'Debug' : '') . 'Container');
-        $this->dispatcher->connect('context.load_factories', array($this, 'setContextContainer'));
-    }
 
-    /**
-     * Sets the service container in context.
-     *
-     * @param sfEvent $event
-     */
-    public function setContextContainer(sfEvent $event)
-    {
-        $context = $event->getSubject();
+        $configuration = $this;
+
+        $this->dispatcher->connect('context.load_factories', function (sfEvent $event) use ($configuration) {
+            /** @var sfContext $context */
+            $context = $event->getSubject();
+
+            if (0 <= version_compare(SYMFONY_VERSION, '1.5.0')) {
+                $container = $context->getServiceContainer();
+            } else {
+                $configuration->configuration->getConfigCache()->import('config/services.yml');
+                $containerClass = sfConfig::get('sf_container_class');
+                $container = new $containerClass();
+            }
+
+            $context->set('container', $container);
+        });
 
         if (0 <= version_compare(SYMFONY_VERSION, '1.5.0')) {
-            $container = $context->getServiceContainer();
-        } else {
-            $this->configuration->getConfigCache()->import('config/services.yml');
-            $containerClass = sfConfig::get('sf_container_class');
-            $container = new $containerClass();
-        }
+            $this->dispatcher->connect(sfContainerGenerator::CONTAINER_BUILD_EVENT, function (sfEvent $event) use ($configuration) {
+                /** @var ContainerBuilder $container */
+                $container = $event->getSubject();
 
-        $context->set('container', $container);
+                $container->addObjectResource($configuration);
+
+                $container->register('sf_event_dispatcher', 'sfEventDispatcher')->setSynthetic(true);
+                $container->register('sf_formatter', 'sfFormatter')->setSynthetic(true);
+                $container->register('sf_user', 'sfUser')->setSynthetic(true);
+                $container->register('sf_routing', 'sfUser')->setSynthetic(true);
+            });
+        }
     }
 }

@@ -12,7 +12,15 @@
     ],
     "require": {
         "symfony/dependency-injection": "~2.3",
+        "symfony/config": "~2.3",
         "composer/installers": "~1.0.0"
+    },
+    "require-dev": {
+        "symfony/http-kernel": "~2.3",
+        "lexpress/symfony1": "~1.5.0"
+    },
+    "suggest": {
+        "symfony/http-foundation": "Allows you to strip the comments in compiled container code."
     },
     "extra": {
         "branch-alias": {
