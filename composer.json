@@ -17,7 +17,8 @@
     },
     "require-dev": {
         "symfony/http-kernel": "~2.3",
-        "lexpress/symfony1": "~1.5.0"
+        "lexpress/symfony1": "~1.5.0",
+        "phpunit/phpunit": "~4.4"
     },
     "suggest": {
         "symfony/http-foundation": "Allows you to strip the comments in compiled container code."
