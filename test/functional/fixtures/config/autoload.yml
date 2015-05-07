@@ -1,0 +1,6 @@
+autoload:
+  sfDependencyInjectionPlugin_lib:
+    name:       sfDependencyInjectionPlugin lib
+    path:       %SF_ROOT_DIR%/../../..
+    exclude:    [ test, vendor ]
+    recursive:  true

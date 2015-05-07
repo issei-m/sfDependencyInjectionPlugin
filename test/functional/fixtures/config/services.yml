@@ -1,0 +1,6 @@
+all:
+  parameters:
+    name: Project
+  services:
+    test:
+      class: TestClass

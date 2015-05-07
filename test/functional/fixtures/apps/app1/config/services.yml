@@ -1,0 +1,6 @@
+all:
+  parameters:
+    name: App1
+  services:
+    test:
+      arguments: [ A, B, C ]

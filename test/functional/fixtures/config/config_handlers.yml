@@ -1,0 +1,3 @@
+config/services.yml:
+  file:  %SF_ROOT_DIR%/../../../lib/config/sfServiceConfigHandler.class.php
+  class: sfServiceConfigHandler
