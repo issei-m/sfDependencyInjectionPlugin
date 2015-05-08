@@ -11,6 +11,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         /** @var sfContainer $container */
         $container = sfContext::getInstance()->getServiceContainer();
 
+        $this->assertTrue($container->getParameter('extended'));
         $this->assertEquals('App1', $container->getParameter('name'));
         $this->assertInstanceOf('TestClass', $container->get('test'));
         $this->assertEquals('A', $container->get('test')->a);
