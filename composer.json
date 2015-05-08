@@ -23,6 +23,9 @@
     "suggest": {
         "symfony/http-foundation": "Allows you to strip the comments in compiled container code."
     },
+    "autoload-dev": {
+        "classmap": [ "lib", "config" ]
+    },
     "extra": {
         "branch-alias": {
             "dev-master": "1.3-dev"

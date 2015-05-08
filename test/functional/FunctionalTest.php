@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/fixtures/config/ProjectConfiguration.class.php';
 
-class FunctionalTest extends \PHPUnit_Framework_TestCase
+class FunctionalTest extends PHPUnit_Framework_TestCase
 {
     public function testDebug()
     {
