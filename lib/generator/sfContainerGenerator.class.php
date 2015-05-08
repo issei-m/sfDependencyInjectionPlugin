@@ -81,7 +81,7 @@ class sfContainerGenerator
 
     private function stripComments($content)
     {
-        if (class_exists('Symfony\Component\HttpKernel')) {
+        if (class_exists('Symfony\Component\HttpKernel\Kernel')) {
             $content = Kernel::stripComments($content);
         }
 
