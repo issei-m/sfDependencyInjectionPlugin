@@ -1,54 +1,22 @@
 sfDependencyInjectionPlugin
 ===========================
 
-It provides supporting the Symfony's DependencyInjection component in your older symfony (1.4) project with Composer.
+[![Build Status](https://travis-ci.org/issei-m/sfDependencyInjectionPlugin.svg?branch=master)](https://travis-ci.org/issei-m/sfDependencyInjectionPlugin)
+
+Provides integration Symfony2's Dependency Injection component with your older symfony (1.4+) project.
 
 Installation
 ------------
 
-Create the following `composer.json` in your symfony 1.4 project's root.
-
-```json
-{
-    "config": {
-        "vendor-dir": "lib/vendor"
-    },
-    "require": {
-        "issei-m/sf-dependency-injection-plugin": "1.*"
-    },
-    "autoload": {
-        "psr-0": { "": "psr" }
-    },
-}
-```
-
-Here, Composer would install the plugin in your `plugins` directory and some Symfony2 components into `vendor/symfony/`.
-Also, You can locate your PSR supported libraries to be auto-loaded in `%SF_ROOT%/psr` (optional).
-
-Install the Composer and install some libraries.
+Using Composer would be best way:
 
 ```
-$ curl -sS https://getcomposer.org/installer | php
-$ php composer.phar install
+$ composer require issei-m/sf-dependency-injection-plugin
 ```
 
-To register the autoloader for libraries installed with composer, you must add this at the top of your ProjectConfiguration class:
+Here, Composer would install this plugin in your `plugins` directory and some other libraries plugin depends on into `vendor`.
 
-``` php
-# config/ProjectConfiguration.class.php
-
-// Composer autoload
-require_once dirname(__DIR__).'/lib/vendor/autoload.php';
-
-// symfony1 autoload
-require_once dirname(__DIR__).'/lib/vendor/symfony/lib/autoload/sfCoreAutoload.class.php';
-sfCoreAutoload::register();
-
-class ProjectConfiguration extends sfProjectConfiguration
-{
-    // ...
-}
-```
+If you don't use Composer, you need to install this plugin and some others manually.
 
 Usage
 -----
@@ -79,7 +47,7 @@ all:
         - [setMailer, ["@mailer"]]
 ```
 
-The `services.yml` is supporting the configuratoin cascade like the `settings.yml`, and it can be located in several different `config` dir. (e.g.`%SF_APP_CONFIG_DIR%`)
+The `services.yml` is supporting the configuratoin cascade like the `settings.yml`, and it can be located in several different `config` directory for apps (e.g.`apps/frontend/config`).
 When the ServiceContainer is compiled, the values from these are merged.
 
 Next, enable this plugin at your `ProjectConfiguration`:
@@ -93,7 +61,7 @@ class ProjectConfiguration extends sfProjectConfiguration
     ...
 ```
 
-Now, your `sfContext` has installed Symfony's ServiceContainer, it is used as following in your code:
+Now, your `sfContext` has installed Symfony's service container, it is used as following in your code:
 
 ```php
 // Get the ServiceContainer.
@@ -102,3 +70,12 @@ $container = sfContext::getInstance()->getContainer();
 // Retrieve the NewsletterManager class which was initialized with the Mailer.
 $newsletterManager = $container->get('newsletter_manager');
 ```
+
+If you use [lexpress/symfony1], `sfServiceContainer` is replaced with plugin's service container. But it might work almost as well as framework's one:
+
+```php
+$container = sfContext::getInstance()->getServiceContainer();
+$newsletterManager = sfContext::getInstance()->getService('newsletter_manager');
+```
+
+[lexpress/symfony1]: https://github.com/LExpress/symfony1
