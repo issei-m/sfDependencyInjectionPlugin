@@ -59,6 +59,8 @@ class ProjectConfiguration extends sfProjectConfiguration
   {
     $this->enablePlugins('sfDependencyInjectionPlugin');
     ...
+  }
+}
 ```
 
 Now, your `sfContext` has installed Symfony's service container, it is used as following in your code:
@@ -76,6 +78,38 @@ If you use [lexpress/symfony1], `sfServiceContainer` is replaced with plugin's s
 ```php
 $container = sfContext::getInstance()->getServiceContainer();
 $newsletterManager = sfContext::getInstance()->getService('newsletter_manager');
+```
+
+### At task
+
+Even though you don't initialize the sfContext at task, you can initialize the service container manually like this:
+  
+```php
+$containerClass = require $this->configuration->getConfigCache()->checkConfig('config/services.yml', true);
+$container = new $containerClass();
+```
+
+Event
+-----
+
+When container is compiled, `service_container.build` event is fired. You can expand container definitions if you subscribe this event:
+ 
+```php
+class ProjectConfiguration extends sfProjectConfiguration
+{
+  public function setup()
+  {
+    $this->dispatcher->connect('service_container.build', function (sfEvent $event) {
+      /** @var \Symfony\Component\DependencyInjection\ContainerBuilder $container */
+      $container->addObjectResource($this);
+      
+      $container = $event->getSubject();
+      $container->setParameter('foo', 'bar');
+      
+      $container->addCompilerPass(new YourPass());
+    });
+  }
+}
 ```
 
 [lexpress/symfony1]: https://github.com/LExpress/symfony1
