@@ -29,7 +29,7 @@ class sfContainerGenerator
     private $debug;
     private $resources = array();
 
-    public function __construct(sfEventDispatcher $eventDispatcher, array $configPaths, $debug)
+    public function __construct(array $configPaths, $debug, sfEventDispatcher $eventDispatcher = null)
     {
         $this->dispatcher = $eventDispatcher;
         $this->config     = sfDefineEnvironmentConfigHandler::getConfiguration($configPaths);
@@ -59,7 +59,9 @@ class sfContainerGenerator
         $container = new ContainerBuilder();
         $container->addObjectResource($this);
 
-        $this->dispatcher->notify(new sfEvent($container, self::CONTAINER_BUILD_EVENT));
+        if ($this->dispatcher) {
+            $this->dispatcher->notify(new sfEvent($container, self::CONTAINER_BUILD_EVENT));
+        }
 
         $loader = new sfContainerArrayLoader($container);
         $loader->load($this->config);
