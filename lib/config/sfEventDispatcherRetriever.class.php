@@ -23,13 +23,13 @@ class sfEventDispatcherRetriever
     /**
      * Returns the sfEventDispatcher instance.
      *
-     * @param $context
+     * @param mixed $context
      *
      * @return sfEventDispatcher|null
      */
     public static function retrieve($context)
     {
-        if ($context instanceof sfContext) {
+        if ($context instanceof sfContext || $context instanceof sfProjectConfiguration) {
             return $context->getEventDispatcher();
         } elseif (isset($GLOBALS['dispatcher'])) {
             return $GLOBALS['dispatcher'];
@@ -38,10 +38,29 @@ class sfEventDispatcherRetriever
         $refClass = new ReflectionClass(get_class($context));
 
         if ($refClass->hasProperty('dispatcher')) {
-            $refProp = $refClass->getProperty('dispatcher');
-            $refProp->setAccessible(true);
+            return self::retrieveByDispatcherProperty($refClass, $context);
+        } elseif ($refClass->hasProperty('configuration')) {
+            return self::retrieveByConfigurationProperty($refClass, $context);
+        }
+    }
 
-            return $refProp->getValue($context);
+    private static function retrieveByDispatcherProperty(ReflectionClass $refClass, $context)
+    {
+        $refProp = $refClass->getProperty('dispatcher');
+        $refProp->setAccessible(true);
+
+        return $refProp->getValue($context);
+    }
+
+    private static function retrieveByConfigurationProperty(ReflectionClass $refClass, $context)
+    {
+        $refProp = $refClass->getProperty('configuration');
+        $refProp->setAccessible(true);
+
+        $configuration = $refProp->getValue($context);
+
+        if ($configuration instanceof sfProjectConfiguration) {
+            return $configuration->getEventDispatcher();
         }
     }
 }

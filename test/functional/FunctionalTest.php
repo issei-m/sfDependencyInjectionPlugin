@@ -33,6 +33,22 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('Z', $container->get('test')->c);
     }
 
+    public function testSfEventDispatcherRetriever()
+    {
+        $context = sfContext::createInstance(sfProjectConfiguration::getApplicationConfiguration('app2', 'test', false));
+        $dispatcher = $context->getEventDispatcher();
+
+        $this->assertSame($dispatcher, sfEventDispatcherRetriever::retrieve($context));
+        $this->assertSame($dispatcher, sfEventDispatcherRetriever::retrieve($context->getConfiguration()));
+        $this->assertSame($dispatcher, sfEventDispatcherRetriever::retrieve($context->getConfiguration()->getPluginConfiguration('sfDependencyInjectionPlugin')));
+        $this->assertSame($dispatcher, sfEventDispatcherRetriever::retrieve($context->getConfiguration()->getConfigCache()));
+        $this->assertNull(sfEventDispatcherRetriever::retrieve(null));
+
+        $GLOBALS['dispatcher'] = $dispatcher;
+        $this->assertSame($dispatcher, sfEventDispatcherRetriever::retrieve(null));
+        unset($GLOBALS['dispatcher']);
+    }
+
     public function tearDown()
     {
         sfContext::getInstance()->shutdown();
