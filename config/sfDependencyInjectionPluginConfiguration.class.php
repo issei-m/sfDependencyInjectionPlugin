@@ -29,7 +29,7 @@ class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
         }
 
         if (0 <= version_compare(SYMFONY_VERSION, '1.5.0')) {
-            $this->dispatcher->connect(sfContainerGenerator::CONTAINER_BUILD_EVENT, array($this, 'onContainerBuildEvent'));
+            $this->dispatcher->connect(sfContainerGenerator::CONTAINER_BUILD_EVENT, array($this, 'onContainerBuild'));
         }
     }
 
@@ -50,7 +50,7 @@ class sfDependencyInjectionPluginConfiguration extends sfPluginConfiguration
         $context->set('container', $container);
     }
 
-    public function onContainerBuildEvent(sfEvent $event)
+    public function onContainerBuild(sfEvent $event)
     {
         /** @var ContainerBuilder $container */
         $container = $event->getSubject();
