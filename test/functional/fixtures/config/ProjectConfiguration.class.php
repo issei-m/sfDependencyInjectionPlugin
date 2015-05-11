@@ -15,7 +15,7 @@ class ProjectConfiguration extends sfProjectConfiguration
         $this->dispatcher->connect('service_container.build', function (sfEvent $event) {
             /** @var \Symfony\Component\DependencyInjection\ContainerBuilder $container */
             $container = $event->getSubject();
-            $container->setParameter('extended', true);
+            $container->setParameter('name', $container->getParameter('name') . ' Application');
         });
     }
 }

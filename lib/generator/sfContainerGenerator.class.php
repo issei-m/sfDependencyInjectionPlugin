@@ -59,12 +59,12 @@ class sfContainerGenerator
         $container = new ContainerBuilder();
         $container->addObjectResource($this);
 
+        $loader = new sfContainerArrayLoader($container);
+        $loader->load($this->config);
+
         if ($this->dispatcher) {
             $this->dispatcher->notify(new sfEvent($container, self::CONTAINER_BUILD_EVENT));
         }
-
-        $loader = new sfContainerArrayLoader($container);
-        $loader->load($this->config);
 
         return $container;
     }
