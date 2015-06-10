@@ -72,7 +72,7 @@ class sfContainerGenerator
     private function dumpContainer(ContainerBuilder $container, ConfigCache $cache, $baseClass)
     {
         $dumper = new PhpDumper($container);
-        $content = $dumper->dump(array('class' => stristr(basename($cache), '.', true), 'base_class' => $baseClass));
+        $content = $dumper->dump(array('class' => stristr(basename($cache->getPath()), '.', true), 'base_class' => $baseClass));
 
         if (!$this->debug) {
             $content = $this->stripComments($content);

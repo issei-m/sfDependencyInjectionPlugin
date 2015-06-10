@@ -14,11 +14,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\ExpressionLanguage\Expression;
 
 /**
  * @author Issei Murasawa <issei.m7@gmail.com>
  *
- * @link https://github.com/symfony/DependencyInjection/blob/v2.3.27/Loader/YamlFileLoader.php
+ * @link https://github.com/symfony/DependencyInjection/blob/v2.7.0/Loader/YamlFileLoader.php
  */
 class sfContainerArrayLoader
 {
@@ -63,7 +64,7 @@ class sfContainerArrayLoader
      *
      * @throws InvalidArgumentException When tags are invalid
      *
-     * @link https://github.com/symfony/DependencyInjection/blob/v2.3.27/Loader/YamlFileLoader.php#L135
+     * @link https://github.com/symfony/DependencyInjection/blob/v2.7.0/Loader/YamlFileLoader.php#L137
      */
     private function parseDefinition($id, $service)
     {
@@ -103,7 +104,7 @@ class sfContainerArrayLoader
         }
 
         if (isset($service['synchronized'])) {
-            $definition->setSynchronized($service['synchronized']);
+            $definition->setSynchronized($service['synchronized'], 'request' !== $id);
         }
 
         if (isset($service['lazy'])) {
@@ -116,6 +117,19 @@ class sfContainerArrayLoader
 
         if (isset($service['abstract'])) {
             $definition->setAbstract($service['abstract']);
+        }
+
+        if (isset($service['factory'])) {
+            if (is_string($service['factory'])) {
+                if (strpos($service['factory'], ':') !== false && strpos($service['factory'], '::') === false) {
+                    $parts = explode(':', $service['factory']);
+                    $definition->setFactory(array($this->resolveServices('@'.$parts[0]), $parts[1]));
+                } else {
+                    $definition->setFactory($service['factory']);
+                }
+            } else {
+                $definition->setFactory(array($this->resolveServices($service['factory'][0]), $service['factory'][1]));
+            }
         }
 
         if (isset($service['factory_class'])) {
@@ -152,40 +166,46 @@ class sfContainerArrayLoader
 
         if (isset($service['calls'])) {
             if (!is_array($service['calls'])) {
-                throw new InvalidArgumentException(sprintf('Parameter "calls" must be an array for service "%s" in %s. Check your YAML syntax.', $id, $file));
+                throw new InvalidArgumentException(sprintf('Parameter "calls" must be an array for service "%s". Check your YAML syntax.', $id));
             }
-
             foreach ($service['calls'] as $call) {
-                $args = isset($call[1]) ? $this->resolveServices($call[1]) : array();
-                $definition->addMethodCall($call[0], $args);
+                if (isset($call['method'])) {
+                    $method = $call['method'];
+                    $args = isset($call['arguments']) ? $this->resolveServices($call['arguments']) : array();
+                } else {
+                    $method = $call[0];
+                    $args = isset($call[1]) ? $this->resolveServices($call[1]) : array();
+                }
+                $definition->addMethodCall($method, $args);
             }
         }
 
         if (isset($service['tags'])) {
             if (!is_array($service['tags'])) {
-                throw new InvalidArgumentException(sprintf('Parameter "tags" must be an array for service "%s" in %s. Check your YAML syntax.', $id, $file));
+                throw new InvalidArgumentException(sprintf('Parameter "tags" must be an array for service "%s". Check your YAML syntax.', $id));
             }
 
             foreach ($service['tags'] as $tag) {
                 if (!is_array($tag)) {
-                    throw new InvalidArgumentException(sprintf('A "tags" entry must be an array for service "%s" in %s. Check your YAML syntax.', $id, $file));
+                    throw new InvalidArgumentException(sprintf('A "tags" entry must be an array for service "%s". Check your YAML syntax.', $id));
                 }
-
                 if (!isset($tag['name'])) {
-                    throw new InvalidArgumentException(sprintf('A "tags" entry is missing a "name" key for service "%s" in %s.', $id, $file));
+                    throw new InvalidArgumentException(sprintf('A "tags" entry is missing a "name" key for service "%s".', $id));
                 }
-
                 $name = $tag['name'];
                 unset($tag['name']);
-
-                foreach ($tag as $value) {
-                    if (!is_scalar($value)) {
-                        throw new InvalidArgumentException(sprintf('A "tags" attribute must be of a scalar-type for service "%s", tag "%s" in %s. Check your YAML syntax.', $id, $name, $file));
+                foreach ($tag as $attribute => $value) {
+                    if (!is_scalar($value) && null !== $value) {
+                        throw new InvalidArgumentException(sprintf('A "tags" attribute must be of a scalar-type for service "%s", tag "%s", attribute "%s". Check your YAML syntax.', $id, $name, $attribute));
                     }
                 }
-
                 $definition->addTag($name, $tag);
             }
+        }
+
+        if (isset($service['decorates'])) {
+            $renameId = isset($service['decoration_inner_name']) ? $service['decoration_inner_name'] : null;
+            $definition->setDecoratedService($service['decorates'], $renameId);
         }
 
         $this->container->setDefinition($id, $definition);
@@ -198,12 +218,14 @@ class sfContainerArrayLoader
      *
      * @return array|string|Reference
      *
-     * @link https://github.com/symfony/DependencyInjection/blob/v2.3.27/Loader/YamlFileLoader.php#L334
+     * @link https://github.com/symfony/DependencyInjection/blob/v2.7.0/Loader/YamlFileLoader.php#L365
      */
     private function resolveServices($value)
     {
         if (is_array($value)) {
             $value = array_map(array($this, 'resolveServices'), $value);
+        } elseif (is_string($value) &&  0 === strpos($value, '@=')) {
+            return new Expression(substr($value, 2));
         } elseif (is_string($value) &&  0 === strpos($value, '@')) {
             if (0 === strpos($value, '@@')) {
                 $value = substr($value, 1);
