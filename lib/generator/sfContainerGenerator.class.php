@@ -12,6 +12,8 @@ use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
+use Symfony\Component\DependencyInjection\Dumper\XmlDumper;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Kernel;
 
 /**
@@ -79,6 +81,10 @@ class sfContainerGenerator
         }
 
         $cache->write($content, array_merge($this->resources, $container->getResources()));
+
+        if ($this->debug) {
+            $this->dumpForDebug(preg_replace('/\.php/', '.xml', $cache->getPath()), $container);
+        }
     }
 
     private function stripComments($content)
@@ -88,5 +94,12 @@ class sfContainerGenerator
         }
 
         return $content;
+    }
+
+    private function dumpForDebug($filename, ContainerBuilder $container)
+    {
+        $dumper = new XmlDumper($container);
+        $filesystem = new Filesystem();
+        $filesystem->dumpFile($filename, $dumper->dump());
     }
 }
