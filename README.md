@@ -92,7 +92,9 @@ $container = new $containerClass();
 Event
 -----
 
-When container is compiled, `service_container.build` event is fired. You can expand container definitions if you subscribe this event:
+When container is compiled, `service_container.build` event is fired. You can expand container definitions if you subscribe this event.
+
+It means you can have control your service container as you wish with your own extension, compiler pass etc...:
  
 ```php
 class ProjectConfiguration extends sfProjectConfiguration
@@ -103,11 +105,14 @@ class ProjectConfiguration extends sfProjectConfiguration
       /** @var \Symfony\Component\DependencyInjection\ContainerBuilder $container */
       $container = $event->getSubject();
       $container->addObjectResource($this);
-      
+
       // additional parameter
       $container->setParameter('foo', 'bar');
-      
-      // compiler pass
+
+      // add extension
+      $container->registerExtension(new YourExtension());
+
+      // add compiler pass
       $container->addCompilerPass(new YourPass());
     });
   }
