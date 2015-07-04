@@ -18,11 +18,12 @@ class sfServiceConfigHandler extends sfYamlConfigHandler
      */
     public function execute($configFiles)
     {
-        $class       = sfConfig::get('sf_container_class');
-        $baseClass   = interface_exists('sfServiceContainerInterface') ? 'sfCompatibleWithSymfony15Container' : 'sfContainer';
-        $date        = date('Y/m/d H:i:s');
-        $debug       = var_export(sfConfig::get('sf_debug'), true);
-        $configPaths = var_export($configFiles, true);
+        $class          = sfConfig::get('sf_container_class');
+        $baseClass      = interface_exists('sfServiceContainerInterface') ? 'sfCompatibleWithSymfony15Container' : 'sfContainer';
+        $date           = date('Y/m/d H:i:s');
+        $debug          = var_export(sfConfig::get('sf_debug'), true);
+        $loggingEnabled = var_export(sfConfig::get('sf_logging_enabled'), true);
+        $configPaths    = var_export($configFiles, true);
 
         return <<< EOF
 <?php
@@ -34,7 +35,7 @@ if (!class_exists(\$class, false)) {
     \$path  = sfConfig::get('sf_app_cache_dir') . '/$class.php';
     \$cache = new Symfony\Component\Config\ConfigCache(\$path, $debug);
     if (!\$cache->isFresh()) {
-        \$generator = new sfContainerGenerator($configPaths, $debug, sfEventDispatcherRetriever::retrieve(\$this));
+        \$generator = new sfContainerGenerator($configPaths, $debug, sfEventDispatcherRetriever::retrieve(\$this), $loggingEnabled);
         \$generator->generate(\$cache, '$baseClass');
     }
 

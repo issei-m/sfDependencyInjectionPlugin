@@ -30,12 +30,14 @@ class sfContainerGenerator
     private $config;
     private $debug;
     private $resources = array();
+    private $logging;
 
-    public function __construct(array $configPaths, $debug, sfEventDispatcher $eventDispatcher = null)
+    public function __construct(array $configPaths, $debug, sfEventDispatcher $eventDispatcher = null, $logging = false)
     {
         $this->dispatcher = $eventDispatcher;
         $this->config     = sfDefineEnvironmentConfigHandler::getConfiguration($configPaths);
         $this->debug      = (bool) $debug;
+        $this->logging    = (bool) $logging;
 
         foreach ($configPaths as $configPath) {
             $this->resources[] = new FileResource($configPath);
@@ -50,10 +52,19 @@ class sfContainerGenerator
      */
     public function generate(ConfigCache $cache, $baseClass = 'Container')
     {
+        if ($this->debug && $this->logging) {
+            $timer = sfTimerManager::getTimer('Building Service Container');
+        }
+
         $container = $this->buildContainer();
         $container->compile();
 
         $this->dumpContainer($container, $cache, $baseClass);
+
+        if (isset($timer)) {
+            $timer->addTime();
+            $this->dispatcher->notify(new sfEvent($this, 'application.log', array('Built service container')));
+        }
     }
 
     private function buildContainer()
